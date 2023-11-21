@@ -9,13 +9,6 @@
 
 int main(int argc, char *argv[])
 {
-    /*size_t m = 100;*/
-    /*size_t n = 20;*/
-    /*double *A = malloc(m*n*sizeof(double));*/
-
-    /*kiss_init();*/
-
-    /*for (size_t i = 0; i < m*n; ++i) A[i] = kiss_unirandf();*/
 
     MM_typecode matcode;
     int mi, ni;
@@ -28,6 +21,9 @@ int main(int argc, char *argv[])
 
     double *A = malloc(mi*ni*sizeof(double));
 
+    /*
+     * REMEMBER: matrix market stores dense matrices in COLUMN MAJOR order.
+     */
     for (int i = 0; i < mi*ni; ++i)
         fscanf(fp, "%lg", &A[i]);
 
