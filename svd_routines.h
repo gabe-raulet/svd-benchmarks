@@ -57,10 +57,11 @@ int serial_thin_lapack_svd_values(double *A, double *svals, size_t m, size_t n)
     size_t ldu = 1;
     size_t ldvt = 1;
     size_t lwork = 5 * min(m,n);
-    double *s = malloc(min(m,n) * sizeof(double));
     double *work = malloc(lwork * sizeof(double));
 
-    LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'N', 'N', m, n, A, lda, s, NULL, ldu, NULL, ldvt, work);
+    LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'N', 'N', m, n, A, lda, svals, NULL, ldu, NULL, ldvt, work);
+
+    free(work);
 
     return 0;
 }
