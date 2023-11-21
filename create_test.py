@@ -6,9 +6,11 @@ import numpy as np
 from scipy.io import mmwrite
 
 def usage():
-    sys.stderr.write("Usage: {} [options] -m <number of rows> -n <number of columns> -r <rank> -o <matrix file> -s <singular values file>\n".format(sys.argv[0]))
+    sys.stderr.write("Usage: {} [options] -m <number of rows> -n <number of columns> -r <rank> -o <matrix file> -S <singular values file>\n".format(sys.argv[0]))
     sys.stderr.write("Options: -d, --dominant-value FLOAT    the dominant singular value (default: 100.0)\n")
     sys.stderr.write("         -a, --damping FLOAT           the damping factor (default: 2.0)\n")
+    sys.stdout.write("         -U PATH                       left singular values matrix\n")
+    sys.stdout.write("         -V PATH                       right singular values matrix (transposed)\n")
     sys.stderr.write("         -h, --help                    print this help message\n")
     sys.exit(1)
 
@@ -25,12 +27,12 @@ def gen_svd_test(nrows, ncols, rank, dom_sval, damping):
     return A, U, S, V
 
 if __name__ == "__main__":
-    try: opts, args = getopt.getopt(sys.argv[1:], "m:n:r:o:s:d:a:h", ["dominant-value=", "damping=", "help"])
+    try: opts, args = getopt.getopt(sys.argv[1:], "m:n:r:o:S:d:a:U:V:h", ["dominant-value=", "damping=", "help"])
     except getopt.GetoptError as err:
         sys.stderr.write("{}\n".format(err))
         usage()
 
-    nrows, ncols, rank, mat_file, sval_file = None, None, None, None, None
+    nrows, ncols, rank, mat_file, sval_file, U_file, Vt_file = None, None, None, None, None, None, None
     dom_sval, damping = 100.0, 2.0
 
     for o, a in opts:
@@ -38,7 +40,9 @@ if __name__ == "__main__":
         elif o == "-n": ncols = int(a)
         elif o == "-r": rank = int(a)
         elif o == "-o": mat_file = a
-        elif o == "-s": sval_file = a
+        elif o == "-S": sval_file = a
+        elif o == "-U": U_file = a
+        elif o == "-V": Vt_file = a
         elif o in ("-d", "--dominant-value"): dom_sval = float(a)
         elif o in ("-a", "--damping"): damping = float(a)
         elif o in ("-h", "--help"): usage()
@@ -51,5 +55,8 @@ if __name__ == "__main__":
     A, U, S, V = gen_svd_test(nrows, ncols, rank, dom_sval, damping)
     mmwrite(mat_file, A)
     np.savetxt(sval_file, np.diag(S), fmt="%.18e")
+
+    if U_file: mmwrite(U_file, U)
+    if Vt_file: mmwrite(Vt_file, V.T)
 
     sys.exit(0)

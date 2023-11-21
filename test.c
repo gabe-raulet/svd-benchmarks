@@ -4,40 +4,32 @@
 #include <assert.h>
 #include <math.h>
 #include "svd_routines.h"
-#include "mmio.h"
+#include "mmio_dense.h"
 #include "kiss.h"
 
 int main(int argc, char *argv[])
 {
-
-    MM_typecode matcode;
+    FILE *f;
     int m, n;
-    FILE *fp = fopen("A.mtx", "r");
+    double *A, *SIGMA, *U, *Vt;
 
-    mm_read_banner(fp, &matcode);
-    assert(mm_is_dense(matcode));
-
-    mm_read_mtx_array_size(fp, &m, &n);
-
-    double *A = malloc(m*n*sizeof(double));
-
-    /*
-     * REMEMBER: matrix market stores dense matrices in COLUMN MAJOR order.
-     */
-    for (int i = 0; i < m*n; ++i)
-        fscanf(fp, "%lg", &A[i]);
-
-    fclose(fp);
-
-    double *SIGMA, *U, *Vt;
-
+    f = fopen("A.mtx", "r");
+    mmio_read_dense(f, &A, &m, &n, 0);
+    fclose(f);
     serial_thin_lapack_svd(A, &SIGMA, &U, &Vt, m, n);
 
-    int p = m < n? m : n;
-    for (int i = 0; i < p; ++i)
-    {
-        printf("%.18e\n", SIGMA[i]);
-    }
+    f = fopen("U.mtx", "w");
+    mmio_write_dense(f, U, m, n, 0);
+    fclose(f);
+
+    f = fopen("Vt.mtx", "w");
+    mmio_write_dense(f, Vt, m, n, 0);
+    fclose(f);
+
+    free(A);
+    free(SIGMA);
+    free(U);
+    free(Vt);
 
     return 0;
 }
