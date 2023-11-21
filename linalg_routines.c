@@ -9,7 +9,7 @@
 #define min(a, b) (((a) < (b))? (a) : (b))
 #define max(a, b) (((a) > (b))? (a) : (b))
 
-int serial_thin_lapack_svd(double *A, double **SIGMA_ref, double **U_ref, double **Vt_ref, int m, int n)
+int serial_thin_svd_lapack(double *A, double **SIGMA_ref, double **U_ref, double **Vt_ref, int m, int n)
 {
     assert(A != NULL && SIGMA_ref != NULL && m >= 1 && n >= 1);
 
@@ -41,6 +41,11 @@ int serial_thin_lapack_svd(double *A, double **SIGMA_ref, double **U_ref, double
 
     free(work);
 
+    return 0;
+}
+
+int serial_qr_lapack(double *A, double **Q_ref, double **R_ref, int m, int n)
+{
     return 0;
 }
 

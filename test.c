@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
-#include "svd_routines.h"
+#include "linalg_routines.h"
 #include "mmio_dense.h"
 #include "kiss.h"
 
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     f = fopen("A.mtx", "r");
     mmio_read_dense(f, &A, &m, &n, 0);
     fclose(f);
-    serial_thin_lapack_svd(A, &SIGMA, &U, &Vt, m, n);
+    serial_thin_svd_lapack(A, &SIGMA, &U, &Vt, m, n);
 
     f = fopen("U.mtx", "w");
     mmio_write_dense(f, U, m, n, 0);
