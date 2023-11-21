@@ -1,10 +1,9 @@
-#ifndef SVD_ROUTINES_H_
-#define SVD_ROUTINES_H_
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <math.h>
+#include "linalg_routines.h"
 #include "lapacke.h"
 
 #define min(a, b) (((a) < (b))? (a) : (b))
@@ -45,4 +44,3 @@ int serial_thin_lapack_svd(double *A, double **SIGMA_ref, double **U_ref, double
     return 0;
 }
 
-#endif
