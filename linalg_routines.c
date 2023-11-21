@@ -46,6 +46,22 @@ int serial_thin_svd_lapack(double *A, double **SIGMA_ref, double **U_ref, double
 
 int serial_qr_lapack(double *A, double **Q_ref, double **R_ref, int m, int n)
 {
+    assert (A != NULL && R_ref != NULL && m >= 1 && n >= 1 && m >= n);
+
+    int drank = n; /* minimum dimension */
+    int lda = m; /* leading dimension of A */
+    double *tau = malloc(drank*sizeof(double));
+    double *R = calloc(n*n, sizeof(double));
+
+    int info = LAPACKE_dgeqrf(LAPACK_COL_MAJOR, m, n, A, lda, tau);
+
+    for (int j = 0; j < n; ++j) /* faster to go column by column since it is column-major */
+        for (int i = 0; i <= j; ++i) /* R is upper triangular */
+            R[i + j*n] = A[i + j*m]; /* R(i,j) = A(i,j) */
+
+    *R_ref = R;
+
+    free(tau);
     return 0;
 }
 
