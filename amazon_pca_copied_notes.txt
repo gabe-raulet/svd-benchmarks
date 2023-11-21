@@ -1,0 +1,78 @@
+
+Amazon SageMaker PCA
+
+* An unsupervised machine learning algorithm for dimensionality reduction
+
+* As a result, nubmer of features within a dataset is reduced but the dataset still retains as much information as possible
+
+* PCA class is inherited from AmazonAlgoirthmEstimatorBase class
+
+* You initialize it with:
+
+    role (str): An AWS IAM role (either name or full ARN). The Amazon SageMaker training jobs and APIs that create Amazon SageMaker endpoints use this role to access training
+                data and model artifacts. After the endpoint is created, the inference code might use the IAM role, if it needs to access an AWS resource.
+
+    instance_count (int): Number of Amazon EC2 instances to use for training.
+
+    instance_type (str): Type of EC2 instance to use for training, for example, 'ml.c4.xlarge'.
+
+    num_components (int): Number of principal components to compute. Must be greater than 0.
+
+    algorithm_mode (str): The algorithm mode to use for the PCA algorithm. Valid modes: 'regular' (default), 'randomized'.
+
+    subtract_mean (bool): Whether to subtract the mean from the input data before computing the PCA.
+
+    extra_components (int): As the value frows larger, the solution becomes more accurate, but takes longer to compute. Defaults to max(10, num_components).
+                            Valid for algorithm_mode='randomized' only.
+
+* This estimator may be fit via calls to AmazonAlgorithmEstimatorBase.fit() or AmazonAlgorithmEstimatorBase.fit_ndarray(). The former requires Amazon
+  :class:~sagemaker.amazon.record_pb2.Record protobuf serialized data to be stored in S3, whereas the latter accepts 2-d numpy arrays directly. To learn more
+  about the Amazon protobuf Record class and how to prepare bulk data in this format, consult: https://docs.aws.amazon.com/sagemaker/latest/dg/cdf-training.html
+
+* After this Estimator is fit, model data is tored in S3. The model may be deployed to an endpoint by invoking AmazonAlgorithmEstimatorBase.deploy(). As well as
+  deploying an endpoint, deploy returns a PCAPredictor object that can be used to project input vectors to the learned lower-dimensional representation, using the
+  trained PCA model hosted in the SageMaker Endpoint.
+
+* PCA Estimators can be configured by setting hyperparameters.
+
+* This Estimator uses Amazon SageMaker PCA to perform training and host deployed models.
+
+How (Amazon SageMaker) PCA Works:
+
+* PCA is a learning algorithm that reduces the dimensionality (number of features) within a dataset while retaining as much information as possible.
+
+* PCA reduces dimensionality by finding a new set of features called components, which are composites of the original features, but are uncorrelated with one
+  another. The first component accounts for the largest possible variability in the data, the second component the second most variable, and so on.
+
+* It is an unsupervised dimensionality reduction algorithm. In unsupervised learning, labels that might be associated with the objects in the dataset aren't
+  used. (??)
+
+* Given the input matrix with rows x1, x2, ..., xn, each of dimension 1*d, the data is partitioned into mini-batches of rows and distributed among the training
+  nodes (workers). Each worker then computes a summary of its data. The summaries of the different workers are then unified into a single solution at the end of
+the computation.
+
+The Amazon SageMaker PCA algorithm uses either of two modes to calculate these summaries, depending on the situation:
+
+* regular: for datasets with sparse data and a moderate number of observations and features.
+
+* randomized: for datasets with both a large number of observations and features. This mode uses an approximation algorithm.
+
+As the algorithm's last step, it performs the singular value decomposition on the unified solution, from which the principal components are then derived.
+
+Take the randomized mode.
+
+* When the number of features in the input dataset is large, we use a method to approximate the covariance3 metric. For every mini-batch Xt of dimension b*d, we
+  randomly initialize a (num_components + extra_components) * b matrix that we multiply by each mini-batch, to create a (num_components + extra_components) * d
+  matrix. The sum of these matrices is computed by the workers, and the servers perform SVD on the final (num_components + extra_components) * d matrix. The top
+  right num_components singular vectors of it are the approximation of the top singular vectors of the input matrix.
+
+* Let l = num_components + extra_components. Given a mini-batch Xt of dimension b*d, the worker draws a random matrix Ht of dimension l*b. Depending on whether
+  the environment uses a GPU or a CPU and the dimension size, the matrix is e3ither a random sign matrix where each entry is +-1 or a FJLT. The worker then
+  computes HtXt and maintains B = sum(HtXt). The worker also maintinas h^T, the sum of columns of H1,...,HT (T being the total number of mini-batches), and s, the
+  sum of all input rows. After processing the entire shard of data, the worker sends the server B, h, s, and n (the number of input rows).
+
+* Denote the different inputs to the server as B^1, H^1, s^1, n^1. The server computes B, h, s, n, the sums of the respective inputs. It then computes C = B -
+  (1/n)*h^T*s, and finds its SVD. The top-right singular vectors and singular values of C are used as the approximate solution to the problem.
+
+
+
