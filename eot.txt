@@ -1,0 +1,17 @@
+Goal by midnight tonight 11/20/23:
+
+    * Serial SVD (thin, k-approx) (values/vectors) (by hand and LAPACK)
+    * Distributed SVD (thin, k-approx) (values/vectors) (by hand and LAPACK/SCALAPACK)
+
+======================================================================================
+
+* Serial SVD (values: high priority, vectors: medium priority)
+    * direct LAPACK
+    * orthogonal iteration
+    * orthogonal iteration with ritz acceleration
+    * orthogonal iteration with lanzcos acceleration
+    * fast Monte Carlo algorithm (randomized)
+
+* Distributed SVD (values: high priority, vectors: medium priority)
+    * direct SCALAPACK
+    * Hauser/Goodman or Boutsidis/Woodruff
