@@ -52,6 +52,7 @@ int serial_qr_lapack(double *A, double **Q_ref, double **R_ref, int m, int n)
     int lda = m; /* leading dimension of A */
     double *tau = malloc(drank*sizeof(double));
     double *R = calloc(n*n, sizeof(double));
+    assert(tau != NULL && R != NULL);
 
     int info = LAPACKE_dgeqrf(LAPACK_COL_MAJOR, m, n, A, lda, tau);
 
@@ -60,6 +61,17 @@ int serial_qr_lapack(double *A, double **Q_ref, double **R_ref, int m, int n)
             R[i + j*n] = A[i + j*m]; /* R(i,j) = A(i,j) */
 
     *R_ref = R;
+
+    if (Q_ref)
+    {
+        double *Q = malloc(m*n*sizeof(double));
+        assert(Q != NULL);
+
+        info = LAPACKE_dorgqr(LAPACK_COL_MAJOR, m, n, drank, A, lda, tau);
+
+        memcpy(Q, A, m*n*sizeof(double));
+        *Q_ref = Q;
+    }
 
     free(tau);
     return 0;

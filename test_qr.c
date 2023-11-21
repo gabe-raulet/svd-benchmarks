@@ -17,8 +17,13 @@ int main(int argc, char *argv[])
     int m, n;
     double *A, *Q, *R;
 
-    m = n = 10;
+    m = 15;
+    n = 10;
     init_random_matrix(&A, m, n);
+
+    f = fopen("A.mtx", "w");
+    mmio_write_dense(f, A, m, n, 0);
+    fclose(f);
 
     serial_qr_lapack(A, &Q, &R, m, n);
 
@@ -26,9 +31,9 @@ int main(int argc, char *argv[])
     mmio_write_dense(f, R, n, n, 0);
     fclose(f);
 
-    /*f = fopen("A.mtx", "w");*/
-    /*mmio_write_dense(f, A, m, n, 0);*/
-    /*fclose(f);*/
+    f = fopen("Q.mtx", "w");
+    mmio_write_dense(f, Q, m, n, 0);
+    fclose(f);
 
     return 0;
 }
